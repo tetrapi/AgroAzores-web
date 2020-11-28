@@ -1,0 +1,8 @@
+{
+  "url": "http://localhost:32769/",
+  "urlApi": "http://localhost:32769/api/",
+  "urlImages": "http://localhost:32769/images/_thumbs/",
+  "reverseGeocode": "https://locationiq.com/v1",
+  "AES_KEY": "hoS(brlJX:~O~Uo8SSA$tzk!<4#}r3v)*~8/[cQGz6;1TxllP9`}q).b^V53Y=w",
+  "algorithm": "aes-256-ctr"
+}

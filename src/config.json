@@ -1,0 +1,7 @@
+{
+  "debug": true,
+  "url": "http://localhost:1337/",
+  "url_ws": "http://localhost/musami-analytics-ws/slim/",
+  "AES_KEY": "hoS(brlJX:~O~Uo8SSA$tzk!<4#}r3v)*~8/[cQGz6;1TxllP9`}q).b^V53Y=w",
+  "algorithm": "aes-256-ctr"
+}

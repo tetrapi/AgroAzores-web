@@ -1,0 +1,8 @@
+{
+  "url": "http://www.v3.acorianooriental.pt/",
+  "urlApi": "http://www.v3.acorianooriental.pt/api/",
+  "urlImages": "http://www.v3.acorianooriental.pt/images/_thumbs/",
+  "reverseGeocode": "https://locationiq.com/v1",
+  "AES_KEY": "hoS(brlJX:~O~Uo8SSA$tzk!<4#}r3v)*~8/[cQGz6;1TxllP9`}q).b^V53Y=w",
+  "algorithm": "aes-256-ctr"
+}
