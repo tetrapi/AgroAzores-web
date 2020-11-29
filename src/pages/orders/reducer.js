@@ -1,39 +1,21 @@
 import {
-    RESPONSE_VALIDATION,
-    RESPONSE_VALIDATION_VIEW,
-    RESPONSE_VALIDATION_UPDATE,
-    RESPONSE_VALIDATION_DELETE,
-    RESPONSE_VALIDATION_CREATE,
+    RESPONSE_ORDERS_COMPLETED,
+    RESPONSE_ORDERS_PENDING,
 } from "./actions";
 
 const initialState = {};
 
 export const productsReducer = (state = initialState, action = {}) => {
     switch (action.type) {
-        case RESPONSE_VALIDATION:
+        case RESPONSE_ORDERS_COMPLETED:
             return {
                 ...state,
-                products: action.products,
+                ordersCompleted: action.ordersCompleted,
             };
-        case RESPONSE_VALIDATION_VIEW:
+        case RESPONSE_ORDERS_PENDING:
             return {
                 ...state,
-                product: action.product,
-            };
-        case RESPONSE_VALIDATION_CREATE:
-            return {
-                ...state,
-                products_create: action.products_create,
-            };
-        case RESPONSE_VALIDATION_UPDATE:
-            return {
-                ...state,
-                products_update: action.products_update,
-            };
-        case RESPONSE_VALIDATION_DELETE:
-            return {
-                ...state,
-                products_detele: action.products_delete,
+                ordersPending: action.ordersPending,
             };
         default:
             return state;
