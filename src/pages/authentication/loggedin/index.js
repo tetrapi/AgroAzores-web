@@ -255,7 +255,7 @@ function Index(props) {
                                 <Orders/>
                             </Route>
 
-                            <Route path="/catalog">
+                            <Route path="/catalogs">
                                 <Catalogs/>
                             </Route>
 

@@ -40,7 +40,7 @@ function handleRequestErrors(response) {
 }
 
 export const getOrdersPending = (postData, props) => dispatch => {
-    fetch(Config.url + 'api/users/17/orders/pending', requestInit("GET", postData, true))
+    fetch(Config.url + '/api/users/100/orders/pending', requestInit("GET", postData, true))
         .then(handleRequestErrors)
         .then(response => response.json())
         .then(response => {
@@ -54,7 +54,7 @@ export const getOrdersPending = (postData, props) => dispatch => {
         });
 };
 export const getOrdersConclued = (postData, props) => dispatch => {
-    fetch(Config.url + 'api/users/17/orders/completed', requestInit("GET", postData, true))
+    fetch(Config.url + '/api/users/17/orders/completed', requestInit("GET", postData, true))
         .then(handleRequestErrors)
         .then(response => response.json())
         .then(response => {

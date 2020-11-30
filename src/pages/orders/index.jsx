@@ -21,6 +21,7 @@ import ThumbUp from '@material-ui/icons/ThumbUp';
 import {QueryBuilder, AssignmentTurnedIn} from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
 import {makeStyles} from '@material-ui/core/styles';
+import Config from "../../config.json";
 
 
 function TabPanel(props) {
@@ -68,10 +69,11 @@ class Orders extends Component {
             value: 0,
         }
     }
+
     // react functions
     componentWillReceiveProps(nextProps, nextContext) {
-        console.log('comclued',nextProps.ordersConclued)
-        console.log('saf',nextProps.ordersPending)
+        console.log('comclued', nextProps.ordersConclued)
+        console.log('saf', nextProps.ordersPending)
 
     }
 
@@ -93,7 +95,7 @@ class Orders extends Component {
                     <Tabs
                         value={this.state.value}
                         onChange={this.handleChange}
-                        style={{padding:0}}
+                        style={{padding: 0}}
                         variant="fullWidth"
                         scrollButtons="on"
                         indicatorColor="primary"
@@ -105,31 +107,36 @@ class Orders extends Component {
                     </Tabs>
                 </AppBar>
                 <TabPanel value={this.state.value} index={0}>
-                    {this.props.ordersPending.map((e) =>
-                        <div key={e.id}>
-                            sdasd
-                        </div>
-                    )}
+                    <div className="d-flex flex-wrap">
+                        {this.props.ordersPending.map((e) =>
+                            <div key={e.id} className="p-3 w-50">
+                                <Card>
+                                    <CardHeader
+                                        avatar={
+                                            <Avatar style={{height: 75, width: 75}} aria-label="recipe" className="avatar">
+                                                <img src={Config.url + e.stock.product.image}/>
+                                            </Avatar>
+                                        }
+                                        title={<strong>Entidade: {e.buyer.company.name} </strong>}
+                                        subheader={(<div><strong>Data: </strong> {e.date_string}<br/><strong>Valor: </strong> {e.price_string}</div>)}
+                                    />
+                                </Card>
+                            </div>
+                        )}
+                    </div>
                 </TabPanel>
                 <TabPanel value={this.state.value} index={1}>
                     {this.props.ordersConclued.map((e) =>
-                        <div key={e.id}>
-
-                            asdf
+                        <div key={e.id} className="p-3 w-50">
                             <Card>
                                 <CardHeader
                                     avatar={
-                                        <Avatar aria-label="recipe" className="avatar">
-                                            R
+                                        <Avatar style={{height: 75, width: 75}} aria-label="recipe" className="avatar">
+                                            <img src={Config.url + e.stock.product.image}/>
                                         </Avatar>
                                     }
-                                    action={
-                                        <IconButton aria-label="settings">
-                                            {/*<MoreVertIcon />*/}
-                                        </IconButton>
-                                    }
-                                    title="Shrimp and Chorizo Paella"
-                                    subheader="September 14, 2016"
+                                    title={<strong>Entidade: {e.buyer.company.name} </strong>}
+                                    subheader={(<div><strong>Data: </strong> {e.date_string}<br/><strong>Valor: </strong> {e.price_string}</div>)}
                                 />
                             </Card>
                         </div>

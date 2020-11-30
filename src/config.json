@@ -1,6 +1,6 @@
 {
   "debug": true,
-  "url": "http://2d84bcf94252.ngrok.io/",
+  "url": "https://w20piza9wn.sharedwithexpose.com",
   "url_ws": "http://localhost/musami-analytics-ws/slim/",
   "AES_KEY": "hoS(brlJX:~O~Uo8SSA$tzk!<4#}r3v)*~8/[cQGz6;1TxllP9`}q).b^V53Y=w",
   "algorithm": "aes-256-ctr"
