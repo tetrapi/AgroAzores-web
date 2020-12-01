@@ -67,3 +67,29 @@ export const getOrdersConclued = (postData, props) => dispatch => {
 
         });
 };
+export const approveOrder = (postData, props) => dispatch => {
+    fetch(Config.url + '/api/orders/'+postData+'/approve', requestInit("GET", null, true))
+        .then(handleRequestErrors)
+        .then(response => response.json())
+        .then(response => {
+            debug('/api/orders/'+postData+'/approve', response);
+            alertSuccess('Encomenda aprovada com sucesso');
+
+        })
+        .catch(function (error) {
+
+        });
+};
+
+export const deleteOrder = (postData, props) => dispatch => {
+    fetch(Config.url + '/api/orders/'+postData+'/cancel', requestInit("GET", null, true))
+        .then(handleRequestErrors)
+        .then(response => response.json())
+        .then(response => {
+            debug('/api/orders/'+postData+'/approve', response);
+            alertSuccess('Encomenda Cancelada com sucesso');
+        })
+        .catch(function (error) {
+
+        });
+};

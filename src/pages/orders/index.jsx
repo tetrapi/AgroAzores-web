@@ -1,13 +1,13 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Connect from "react-redux/es/connect/connect";
-import {getOrdersPending, getOrdersConclued} from "./functions"
+import {getOrdersPending, getOrdersConclued, approveOrder, deleteOrder} from "./functions"
 import './index.css';
 import {MDBDataTable} from "mdbreact";
 import {Link, withRouter} from "react-router-dom";
 import Button from "@material-ui/core/Button";
 import EditIcon from "@material-ui/icons/Edit";
-import {debug} from "../../actions/encrypt";
+import {debug, getItem} from "../../actions/encrypt";
 import DeleteIcon from "@material-ui/icons/DeleteForever";
 import AppBar from '@material-ui/core/AppBar';
 import {
@@ -22,7 +22,8 @@ import {
     Grid,
     Paper,
     TextField,
-    Modal
+    Modal,
+
 } from '@material-ui/core';
 import PhoneIcon from '@material-ui/icons/Phone';
 import FavoriteIcon from '@material-ui/icons/Favorite';
@@ -80,8 +81,8 @@ class Orders extends Component {
         super(props);
         this.state = {
             value: 0,
-            modalOrderView: true,
-            selectedOrder: {'name': 'maça', 'color': '#D68D00', 'colorLight': '#FEFFDD'}
+            modalOrderView: false,
+            selectedOrder: null
         }
     }
 
@@ -102,6 +103,26 @@ class Orders extends Component {
     };
 
     render() {
+        const selectedOrder = this.state.selectedOrder;
+        let stockImage = '';
+        let name = '';
+        let colorLight = '';
+        let quantity_string = '';
+        let price_string = '';
+        let date_string = '';
+        let order_id = '';
+        if (selectedOrder != null) {
+            const stock = selectedOrder.stock;
+            const order = selectedOrder;
+            quantity_string = order.quantity_string;
+            price_string = order.price_string;
+            date_string = order.date_string;
+            stockImage = stock.product.image;
+            name = stock.product.name;
+            order_id = order.id;
+            colorLight = stock.product.color_light;
+        }
+
         return (
             <div>
                 <AppBar position="static" color="default" className="p-0">
@@ -122,16 +143,20 @@ class Orders extends Component {
                 <TabPanel value={this.state.value} index={0}>
                     <div className="d-flex flex-wrap">
                         {this.props.ordersPending.map((e) =>
-                            <div key={e.id} className="p-3 w-50" style={{cursor: 'pointer'}} onClick={() => this.handleOpenModalOrderView()}>
+                            <div key={e.id} className="p-3 w-50" style={{cursor: 'pointer'}}
+                                 onClick={() => this.handleOpenModalOrderView(e)}>
                                 <Card>
                                     <CardHeader
                                         avatar={
-                                            <Avatar style={{height: 75, width: 75}} aria-label="recipe" className="avatar">
-                                                <img src={Config.url + e.stock.product.image}/>
+                                            <Avatar style={{height: 75, width: 75}} aria-label="recipe"
+                                                    className="avatar">
+                                                <img style={{height: '100%'}} src={Config.url + e.stock.product.image}/>
                                             </Avatar>
                                         }
                                         title={<strong>Entidade: {e.buyer.company.name} </strong>}
-                                        subheader={(<div><strong>Data: </strong> {e.date_string}<br/><strong>Valor: </strong> {e.price_string}</div>)}
+                                        subheader={(<div>
+                                            <strong>Data: </strong> {e.date_string}<br/><strong>Valor: </strong> {e.price_string}
+                                        </div>)}
                                     />
                                 </Card>
                             </div>
@@ -140,16 +165,20 @@ class Orders extends Component {
                 </TabPanel>
                 <TabPanel value={this.state.value} index={1}>
                     {this.props.ordersConclued.map((e) =>
-                        <div key={e.id} className="p-3 w-50">
+                        <div key={e.id} className="p-3 w-50" style={{cursor: 'pointer'}}
+                             onClick={() => this.handleOpenModalOrderView(e)}>
                             <Card>
                                 <CardHeader
                                     avatar={
-                                        <Avatar style={{height: 75, width: 75}} aria-label="recipe" className="avatar">
-                                            <img src={Config.url + e.stock.product.image}/>
+                                        <Avatar style={{height: 75, width: 75}} aria-label="recipe"
+                                                className="avatar">
+                                            <img style={{height: '100%'}} src={Config.url + e.stock.product.image}/>
                                         </Avatar>
                                     }
                                     title={<strong>Entidade: {e.buyer.company.name} </strong>}
-                                    subheader={(<div><strong>Data: </strong> {e.date_string}<br/><strong>Valor: </strong> {e.price_string}</div>)}
+                                    subheader={(<div>
+                                        <strong>Data: </strong> {e.date_string}<br/><strong>Valor: </strong> {e.price_string}
+                                    </div>)}
                                 />
                             </Card>
                         </div>
@@ -168,13 +197,13 @@ class Orders extends Component {
                     // }}
                 >
                     <Fade in={this.state.modalOrderView}>
-                        <form onSubmit={(e) => this.addProductStock(e)}>
+                        <form onSubmit={(e) => this.approveOrder(e, order_id)}>
                             <div className="card position-absolute "
                                  style={{right: "50%", top: "50%", transform: "translate(50%,-50%)"}}>
                                 <div className="header d-flex" style={{borderBottom: "0.1px #e0e0e0 solid"}}>
                                     <div className="w-50">
                                         <div style={{fontSize: 22, fontWeight: "400", padding: 12}}>
-                                            Efetuar Reserva
+                                            Visualização de encomenda
                                         </div>
                                     </div>
                                     <div className="w-50">
@@ -190,7 +219,7 @@ class Orders extends Component {
                                             <div style={{
                                                 width: 500,
                                                 height: 250,
-                                                backgroundImage: 'url(' + Config.url + this.state.selectedImage + ')',
+                                                backgroundImage: 'url(' + Config.url + stockImage + ')',
                                                 backgroundSize: "cover",
                                             }}/>
                                         </div>
@@ -204,9 +233,9 @@ class Orders extends Component {
                                                 border: 'solid 2px #000',
                                                 borderRadius: 8,
                                                 lineHeight: '44px',
-                                                backgroundColor: this.state.selectedOrder.colorLight
+                                                backgroundColor: colorLight
                                             }} className="mx-auto text-center">
-                                                {this.state.selectedOrder.name}
+                                                {name}
                                             </div>
                                         </div>
                                     </div>
@@ -215,45 +244,78 @@ class Orders extends Component {
                                     <div className="d-table mx-5" style={{width: 450}}>
                                         <Grid container spacing={3}>
                                             <Grid item xs={12}>
-                                                <Paper className="position-relative" style={{backgroundColor: '#F0F0F0', height: 56}}>
-                                                    <div className="float-left position-absolute" style={{color:  'rgba(0, 0, 0, 0.54)', left:25,top:17 }}><strong>520 kg</strong></div>
+                                                <Paper className="position-relative"
+                                                       style={{backgroundColor: '#F0F0F0', height: 56}}>
+                                                    <div className="float-left position-absolute"
+                                                         style={{color: 'rgba(0, 0, 0, 0.54)', left: 25, top: 17}}>
+                                                        <strong>{quantity_string}</strong></div>
                                                 </Paper>
                                             </Grid>
                                             <Grid item xs={12}>
-                                                <Paper className="position-relative" style={{backgroundColor: '#F0F0F0', height: 56}}>
-                                                    <div className="float-left position-absolute" style={{color:  'rgba(0, 0, 0, 0.54)', left:25,top:17 }}><strong>1544548468484€</strong></div>
+                                                <Paper className="position-relative"
+                                                       style={{backgroundColor: '#F0F0F0', height: 56}}>
+                                                    <div className="float-left position-absolute"
+                                                         style={{color: 'rgba(0, 0, 0, 0.54)', left: 25, top: 17}}>
+                                                        <strong>{price_string}</strong></div>
                                                 </Paper>
                                             </Grid>
                                             <Grid item xs={12}>
-                                                <Paper className="position-relative" style={{backgroundColor: '#F0F0F0', height: 56}}>
-                                                    <div className="float-left position-absolute" style={{color:  'rgba(0, 0, 0, 0.54)', left:25,top:17 }}><strong>12-12-2021</strong></div>
+                                                <Paper className="position-relative"
+                                                       style={{backgroundColor: '#F0F0F0', height: 56}}>
+                                                    <div className="float-left position-absolute"
+                                                         style={{color: 'rgba(0, 0, 0, 0.54)', left: 25, top: 17}}>
+                                                        <strong>{date_string}</strong></div>
                                                 </Paper>
                                             </Grid>
                                             <Grid item xs={12}/>
                                             <Grid item xs={12}/>
                                             <Grid item xs={12}/>
                                         </Grid>
-                                        <div className="d-flex">
-                                            <Button
-                                                variant="contained"
-                                                className="w-50 mr-3"
-                                                style={{height: 56, backgroundColor: '#d11a2a', color: '#fff'}}
-                                                endIcon={<Delete/>}
-                                                type="submit"
-                                            >
-                                                Cancelar
-                                            </Button>
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                className="w-50 ml-3"
-                                                style={{height: 56}}
-                                                endIcon={<Save/>}
-                                                type="submit"
-                                            >
-                                                Aprovar
-                                            </Button>
-                                        </div>
+                                        {getItem('user_id') === 5 ?
+                                            <div className="d-flex">
+                                                <Button
+                                                    variant="contained"
+                                                    className="w-50 mr-3"
+                                                    style={{height: 56, backgroundColor: '#d11a2a', color: '#fff'}}
+                                                    endIcon={<Delete/>}
+                                                    onClick={() => this.deleteOrder(order_id)}
+                                                >
+                                                    Cancelar
+                                                </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    className="w-50 ml-3"
+                                                    style={{height: 56}}
+                                                    endIcon={<Save/>}
+                                                    type="submit"
+                                                >
+                                                    Aprovar
+                                                </Button>
+                                            </div>
+                                            :
+                                            <div className="d-flex">
+                                                <Button
+                                                    variant="contained"
+                                                    className="w-50 mr-3"
+                                                    style={{height: 56, backgroundColor: '#d11a2a', color: '#fff'}}
+                                                    endIcon={<Delete/>}
+                                                    onClick={() => this.deleteOrder(order_id)}
+                                                >
+                                                    Cancelar
+                                                </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    className="w-50 ml-3"
+                                                    style={{height: 56}}
+                                                    endIcon={<Save/>}
+                                                    type="submit"
+                                                >
+                                                    Aprovar
+                                                </Button>
+                                            </div>
+                                        }
                                         <br/>
                                         <br/>
 
@@ -266,15 +328,41 @@ class Orders extends Component {
             </div>
         );
     }
-    handleCloseModalOrderView(){
+
+    handleCloseModalOrderView(data) {
+
         this.setState({
-            modalOrderView: false
+            modalOrderView: false,
+            selectedOrder: null
         })
     }
-    handleOpenModalOrderView(){
+
+    handleOpenModalOrderView(data) {
         this.setState({
-            modalOrderView: true
+            modalOrderView: true,
+            selectedOrder: data
         })
+    }
+
+    approveOrder(e, order) {
+        e.preventDefault();
+        console.log(order);
+        console.log('aprove order');
+        this.props.approveOrder(order, this.props);
+        this.props.getOrdersPending();
+        this.props.getOrdersConclued();
+        this.handleCloseModalOrderView();
+
+    }
+
+    deleteOrder(order) {
+        console.log(order);
+        console.log('cancel order');
+        this.props.deleteOrder(order, this.props);
+        this.props.getOrdersPending();
+        this.props.getOrdersConclued();
+        this.handleCloseModalOrderView();
+
     }
 }
 
@@ -285,7 +373,9 @@ const mapStateToProps = store => ({
 
 const mapFunctionsToProps = {
     getOrdersPending,
-    getOrdersConclued
+    getOrdersConclued,
+    approveOrder,
+    deleteOrder
 };
 
 Orders.defaultProps = {
