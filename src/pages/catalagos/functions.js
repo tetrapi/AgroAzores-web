@@ -86,6 +86,8 @@ export const getProducts = (postData, props) => dispatch => {
 };
 
 export const addProductStock = (postData, props) => dispatch => {
+	console.log("addProductStock() props -> ", postData)
+	console.log("addProductStock() url -> ", Config.url + '/api/stock')
     fetch(Config.url + '/api/stock', requestInit("POST", postData, true))
         .then(handleRequestErrors)
         .then(response => response.json())

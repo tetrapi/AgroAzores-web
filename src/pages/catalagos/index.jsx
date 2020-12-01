@@ -10,6 +10,8 @@ import EditIcon from "@material-ui/icons/Edit";
 import {debug, getItem} from "../../actions/encrypt";
 import DeleteIcon from "@material-ui/icons/DeleteForever";
 import AppBar from '@material-ui/core/AppBar';
+import {ProductListModal} from '../product_list/modal'
+import {CreateProductModal} from '../modals/create_product/modal'
 import {
     Tab,
     Tabs,
@@ -98,12 +100,13 @@ class Catalogs extends Component {
             modalReserve: false,
             modalReserveFuture: false,
             selectedImage: '',
-            product: 0,
+            product: undefined,
             enable_data: true,
             enable_min_quantity: true,
             expanded: false,
             productFilter: undefined,
-            selectedStock: {'name': 'maça', 'color': '#D68D00', 'colorLight': '#FEFFDD'}
+            selectedStock: {'name': 'maça', 'color': '#D68D00', 'colorLight': '#FEFFDD'},
+	        productListModalVisible: false,
         }
     }
 
@@ -183,182 +186,12 @@ class Catalogs extends Component {
                     )}
                 </TabPanel>
 	            {this.renderProductButton()}
-                <Modal
-                    aria-labelledby="spring-modal-title"
-                    aria-describedby="spring-modal-description"
-                    className=""
-                    open={this.state.modal}
-                    onClose={(e) => this.handleClose()}
-                    closeAfterTransition
-                    // BackdropComponent={Backdrop}
-                    // BackdropProps={{
-                    //     timeout: 500,
-                    // }}
-                >
-                    <Fade in={this.state.modal}>
-                        <form onSubmit={(e) => this.addProductStock(e)}>
-                            <div className="card position-absolute "
-                                 style={{right: "50%", top: "50%", transform: "translate(50%,-50%)"}}>
-                                <div className="header d-flex" style={{borderBottom: "0.1px #e0e0e0 solid"}}>
-                                    <div className="w-50">
-                                        <div style={{fontSize: 22, fontWeight: "400", padding: 12}}>
-                                            Adicionar Produto
-                                        </div>
-                                    </div>
-                                    <div className="w-50">
-                                        <IconButton aria-label="delete" className="float-right"
-                                                    onClick={(e) => this.handleClose()}>
-                                            <Close fontSize="large"/>
-                                        </IconButton>
-                                    </div>
-                                </div>
-                                {/*<div className="body d-flex">*/}
-                                {/*    <div className="mx-auto d-flex m-3">*/}
-                                {/*        <Avatar style={{height: 125, width: 125}} aria-label="recipe"*/}
-                                {/*                className="avatar p-2">*/}
-                                {/*            <img className="h-100 w-100" src={Config.url + this.state.selectedImage}/>*/}
-                                {/*        </Avatar>*/}
-                                {/*        <div style={{height: 125, width: 250}} className="p-2 d-flex">*/}
-                                {/*            <FormControl variant="outlined" className="w-100 my-auto">*/}
-                                {/*                <InputLabel id="demo-simple-select-outlined-label"*/}
-                                {/*                            className="w-100">Produto</InputLabel>*/}
-                                {/*                <Select*/}
-                                {/*                    labelId="demo-simple-select-outlined-label"*/}
-                                {/*                    id="demo-simple-select-outlined"*/}
-                                {/*                    value={this.state.product}*/}
-                                {/*                    onChange={(e) => this.handleChangeProduct(e)}*/}
-                                {/*                    label="Produto"*/}
-                                {/*                >*/}
-                                {/*                    {*/}
-                                {/*                        this.props.products.map((e) =>*/}
-                                {/*                            <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>*/}
-                                {/*                        )*/}
-                                {/*                    }*/}
-                                {/*                </Select>*/}
-                                {/*            </FormControl>*/}
-                                {/*        </div>*/}
-                                {/*    </div>*/}
-                                {/*</div>*/}
-                                <div className="body d-flex">
-                                    <div className="mx-auto m-3">
-                                        <div className="avatar p-2">
-                                            <div style={{
-                                                width: 500,
-                                                height: 250,
-                                                backgroundImage: 'url(' + Config.url + this.state.selectedImage + ')',
-                                                backgroundSize: "cover",
-                                            }}/>
-                                        </div>
-                                        <div style={{height: 56, width: 400, marginTop: '-45px'}}
-                                             className="p-2 d-flex mx-auto">
-                                            <div style={{
-                                                height: 56,
-                                                width: 350,
-                                                fontWeight: 600,
-                                                fontSize: 22,
-                                                border: 'solid 2px #000',
-                                                borderRadius: 8,
-                                                lineHeight: '44px',
-                                                backgroundColor: this.state.selectedStock.colorLight
-                                            }} className="mx-auto text-center">
-                                                {this.state.selectedStock.name}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="">
-                                    <div className="d-table mx-5" style={{width: 450}}>
-                                        <Grid container spacing={3}>
-                                            <Grid item xs={12}>
-                                                <Paper className="position-relative"
-                                                       style={{backgroundColor: '#fff', height: 56}}>
-                                                    <TextField
-                                                        label="Quantidade"
-                                                        id="quantity"
-                                                        name="quantity"
-                                                        type="number"
-                                                        className="w-100"
-                                                        InputProps={{
-                                                            startAdornment: <InputAdornment
-                                                                position="start">+1</InputAdornment>,
-                                                        }}
-                                                        variant="outlined"
-                                                    />
-                                                </Paper>
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <Paper className="position-relative"
-                                                       style={{backgroundColor: '#fff', height: 56}}>
-                                                    <TextField
-                                                        label="Preço"
-                                                        id="price"
-                                                        name="price"
-                                                        type="number"
-                                                        className="w-100"
-                                                        InputProps={{
-                                                            startAdornment: <InputAdornment
-                                                                position="start">€</InputAdornment>,
-                                                        }}
-                                                        variant="outlined"
-                                                    />
-                                                </Paper>
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <Paper className="position-relative"
-                                                       style={{backgroundColor: '#fff', height: 56}}>
-                                                    <TextField
-                                                        id="stock_date"
-                                                        label="Data"
-                                                        name="stock_date"
-                                                        type="date"
-                                                        className="w-100"
-                                                        InputProps={{
-                                                            startAdornment: <InputAdornment
-                                                                position="start"><CalendarToday/></InputAdornment>
-                                                        }}
-                                                        InputLabelProps={{
-                                                            shrink: true,
-                                                        }}
-                                                        variant="outlined"
-                                                    />
-                                                </Paper>
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <Paper className="position-relative"
-                                                       style={{backgroundColor: '#fff', height: 56}}>
-                                                            <TextField
-                                                                label="Quantidade miníma"
-                                                                id="min_quantity"
-                                                                name="min_quantity"
-                                                                type="number"
-                                                                className="w-100"
-                                                                InputProps={{
-                                                                    startAdornment: <InputAdornment position="start">+1</InputAdornment>,
-                                                                }}
-                                                                variant="outlined"
-                                                            />
-                                                </Paper>
-                                            </Grid>
-                                            <Grid item xs={12}/>
-                                            <Grid item xs={12}/>
-                                        </Grid>
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            className="w-100 my-3"
-                                            style={{height: 56}}
-                                            endIcon={<Receipt/>}
-                                            type="submit"
-                                        >
-                                            Efetuar Reserba
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </Fade>
-                </Modal>
+                <CreateProductModal
+	                show={this.state.modal}
+	                onClose={(e) => this.handleClose()}
+	                onAddProduct={(e) => this.addProductStock(e)}
+	                product={this.state.product}
+                />
                 <Modal
                     aria-labelledby="spring-modal-title"
                     aria-describedby="spring-modal-description"
@@ -610,6 +443,22 @@ class Catalogs extends Component {
                         </form>
                     </Fade>
                 </Modal>
+	            <ProductListModal
+		            show={this.state.productListModalVisible}
+		            products={this.props.products}
+		            onClose={(e) => {
+		            	this.setState({
+				            productListModalVisible: false
+			            })
+		            } }
+		            onCardClicked={(product) => {
+		            	this.setState({
+				            product,
+				            modal: true,
+				            productListModalVisible: false
+			            })
+		            }}
+	            />
             </div>
         );
     }
@@ -784,7 +633,7 @@ class Catalogs extends Component {
 
     handleOpen() {
         this.setState({
-            modal: true
+	        productListModalVisible: true
         })
     }
 
@@ -816,12 +665,18 @@ class Catalogs extends Component {
         e.preventDefault();
         let postData = {
             'user_id': getItem("user_id"),
-            'product_id': this.state.product,
+            'product_id': this.state.product.id,
             'quantity': e.target.quantity.value,
             'price': e.target.price.value,
         }
-	    postData['stock_date'] = e.target.stock_date.value;
-	    postData['min_quantity'] = e.target.min_quantity.value;
+        if (e.target.stock_date.value.length !== 0) {
+	        postData['stock_date'] = e.target.stock_date.value;
+        }
+
+        if (!e.target.min_quantity.value.length !== 0) {
+	        postData['min_quantity'] = e.target.min_quantity.value;
+        }
+
 
         console.log('post data', postData)
         this.props.addProductStock(postData, this.props);
