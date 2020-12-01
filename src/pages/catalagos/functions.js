@@ -41,7 +41,7 @@ function handleRequestErrors(response) {
 }
 
 export const getCatalogsInStore = (postData, props) => dispatch => {
-    fetch(Config.url + '/api/users/17/stock/available', requestInit("GET", postData, true))
+    fetch(Config.url + '/api/users/'+getItem('user_id')+'/stock/available', requestInit("GET", postData, true))
         .then(handleRequestErrors)
         .then(response => response.json())
         .then(response => {
@@ -55,7 +55,7 @@ export const getCatalogsInStore = (postData, props) => dispatch => {
         });
 };
 export const getCatalogsInProduction = (postData, props) => dispatch => {
-    fetch(Config.url + '/api/users/17/stock/future', requestInit("GET", postData, true))
+    fetch(Config.url + '/api/users/'+getItem('user_id')+'/stock/future', requestInit("GET", postData, true))
         .then(handleRequestErrors)
         .then(response => response.json())
         .then(response => {

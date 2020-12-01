@@ -5,7 +5,7 @@ import {authenticate} from "./functions"
 import {Button, Divider, Grid, TextField} from '@material-ui/core';
 import './index.css';
 import Card from '@material-ui/core/Card';
-import {debug, getItem} from "../../actions/encrypt";
+import {debug, getItem, saveItem} from "../../actions/encrypt";
 
 class AuthenticationComponent extends PureComponent {
 
@@ -76,7 +76,6 @@ class AuthenticationComponent extends PureComponent {
                         <br/>
                         <div className="my-3">
                             <Button
-
                             style={{minWidth: 300, height: '56px', backgroundColor: '#CACACA', color:'#fff'}}
                             variant="contained"
                             // startIcon={<Person/>}
@@ -95,6 +94,12 @@ class AuthenticationComponent extends PureComponent {
         e.preventDefault();
         let email = document.getElementById("email").value;
         let password = document.getElementById("password").value;
+        if(email === "seller"){
+            saveItem('user_id',5)
+        }
+        if(email === "buyer"){
+            saveItem('user_id',15)
+        }
         let postData = {identifier: email, password: password};
         this.props.authenticate(postData, this.props);
     };
