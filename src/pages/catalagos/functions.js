@@ -41,10 +41,12 @@ function handleRequestErrors(response) {
 }
 
 export const getCatalogsInStore = (postData, props) => dispatch => {
+	console.log("getCatalogsInStore -> ", postData)
     fetch(Config.url + '/api/users/'+getItem('user_id')+'/stock/available', requestInit("GET", postData, true))
         .then(handleRequestErrors)
         .then(response => response.json())
         .then(response => {
+        	console.log("products for sale -> ", response)
             dispatch({
                 type: RESPONSE_CATALOGS_STORE,
                 catalogsInStore: response,
@@ -88,10 +90,47 @@ export const addProductStock = (postData, props) => dispatch => {
         .then(handleRequestErrors)
         .then(response => response.json())
         .then(response => {
+        	console.log("response -->", response)
             alertSuccess('Produto adicionado com sucesso!');
 
         })
         .catch(function (error) {
 
         });
+};
+
+export const getProductStockAvailable = (postData, props) => dispatch => {
+	console.log("getProductStockAvailable -> ", postData)
+	console.log("url -> ", Config.url + '/api/products/'+ postData.product_id +'/stock/?available=true')
+	fetch(Config.url + '/api/products/'+ postData.product_id +'/stock?available=true', requestInit("GET", postData, true))
+		.then(handleRequestErrors)
+		.then(response => response.json())
+		.then(response => {
+			console.log("products for sale -> ", response)
+			dispatch({
+				type: RESPONSE_CATALOGS_STORE,
+				catalogsInStore: response,
+			})
+		})
+		.catch(function (error) {
+
+		});
+};
+
+export const getProductStockFuture = (postData, props) => dispatch => {
+	console.log("getProductStockFuture -> ", postData)
+	console.log("url -> ", Config.url + '/api/products/'+ postData.product_id +'/stock/?available=false')
+	fetch(Config.url + '/api/products/'+ postData.product_id +'/stock?available=false', requestInit("GET", postData, true))
+		.then(handleRequestErrors)
+		.then(response => response.json())
+		.then(response => {
+			console.log("products for sale -> ", response)
+			dispatch({
+				type: RESPONSE_CATALOGS_PRODUCTION,
+				catalogsInStore: response,
+			})
+		})
+		.catch(function (error) {
+
+		});
 };

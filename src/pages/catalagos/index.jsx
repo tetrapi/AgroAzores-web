@@ -1,13 +1,13 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Connect from "react-redux/es/connect/connect";
-import {getCatalogsInStore, getCatalogsInProduction, getProducts, addProductStock} from "./functions"
+import {getCatalogsInStore, getCatalogsInProduction, getProducts, addProductStock, getProductStockAvailable, getProductStockFuture} from "./functions"
 import './index.css';
 import {MDBDataTable} from "mdbreact";
 import {Link, withRouter} from "react-router-dom";
 import Button from "@material-ui/core/Button";
 import EditIcon from "@material-ui/icons/Edit";
-import {debug} from "../../actions/encrypt";
+import {debug, getItem} from "../../actions/encrypt";
 import DeleteIcon from "@material-ui/icons/DeleteForever";
 import AppBar from '@material-ui/core/AppBar';
 import {
@@ -96,13 +96,13 @@ class Catalogs extends Component {
             value: 0,
             modal: false,
             modalReserve: false,
-            modalReserveFuture: true,
+            modalReserveFuture: false,
             selectedImage: '',
             product: 0,
             enable_data: true,
             enable_min_quantity: true,
             expanded: false,
-            productFilter: 0,
+            productFilter: undefined,
             selectedStock: {'name': 'maça', 'color': '#D68D00', 'colorLight': '#FEFFDD'}
         }
     }
@@ -135,6 +135,10 @@ class Catalogs extends Component {
     };
 
     render() {
+    	console.log("user", getItem("user_id"))
+	    console.log("stock in store -> ", this.props.catalogsInStore)
+    	console.log("stock in production -> ", this.props.catalogsInProduction)
+
         return (
             <div>
                 <AppBar position="static" color="default" className="p-0">
@@ -151,78 +155,12 @@ class Catalogs extends Component {
                         <Tab label="Em loja" icon={<Store/>} {...a11yProps(0)} />
                         <Tab label="Em produção" icon={<WbSunnyOutlined/>} {...a11yProps(1)} />
                     </Tabs>
-                    <Accordion expanded={this.state.expanded} onChange={() => this.acordionHandleChange()}>
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon/>}
-                            aria-controls="panel1bh-content"
-                            id="panel1bh-header"
-                        >
-                            <Typography className="">Filtros</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails className="d-block">
-                            <div className="d-flex">
-                                <FormControl variant="outlined" className="my-auto" style={{width: 350}}>
-                                    <InputLabel id="demo-simple-select-outlined-label"
-                                                className="w-100">Produto</InputLabel>
-                                    <Select
-                                        labelId="demo-simple-select-outlined-label"
-                                        id="demo-simple-select-outlined"
-                                        value={this.state.productFilter}
-                                        onChange={(e) => this.handleChangeProductFilter(e)}
-                                        label="Produto"
-                                    >
-                                        <MenuItem key={0} value={0}> </MenuItem>
-                                        {
-                                            this.props.products.map((e) =>
-                                                <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>
-                                            )
-                                        }
-                                    </Select>
-                                </FormControl>
-                            </div>
-                            {/*<br/>*/}
-                            {/*<div className="d-flex">*/}
-                            {/*    <FormControl variant="outlined" className="my-auto">*/}
-                            {/*        <InputLabel id="demo-simple-select-outlined-label"*/}
-                            {/*                    className="w-100">Ordernar por</InputLabel>*/}
-                            {/*        <Select*/}
-                            {/*            labelId="demo-simple-select-outlined-label"*/}
-                            {/*            id="demo-simple-select-outlined"*/}
-                            {/*            value={this.state.product}*/}
-                            {/*            onChange={(e) => this.handleChangeProduct(e)}*/}
-                            {/*            label="Produto"*/}
-                            {/*        >*/}
-                            {/*            {*/}
-                            {/*                this.props.products.map((e) =>*/}
-                            {/*                    <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>*/}
-                            {/*                )*/}
-                            {/*            }*/}
-                            {/*        </Select>*/}
-                            {/*    </FormControl>*/}
-                            {/*</div>*/}
-                        </AccordionDetails>
-                    </Accordion>
+	                {this.renderProductFilter()}
                 </AppBar>
                 <TabPanel value={this.state.value} index={0}>
+
                     <div className="d-flex flex-wrap">
-                        {this.props.catalogsInStore.map((e) =>
-                            <div key={e.id} className="p-3 w-50">
-                                <Card>
-                                    <CardHeader
-                                        avatar={
-                                            <Avatar style={{height: 75, width: 75}} aria-label="recipe"
-                                                    className="avatar">
-                                                <img src={Config.url + e.product.image}/>
-                                            </Avatar>
-                                        }
-                                        title={<strong>Produto: {e.product.name}</strong>}
-                                        subheader={(<div>
-                                            <strong>Data: </strong> {e.date_string}<br/><strong>Valor: </strong> {e.price_string}<br/><strong>Quantidade: </strong> {e.quantity_string}
-                                        </div>)}
-                                    />
-                                </Card>
-                            </div>
-                        )}
+	                    {this.renderStockInStore()}
                     </div>
                 </TabPanel>
                 <TabPanel value={this.state.value} index={1}>
@@ -244,11 +182,7 @@ class Catalogs extends Component {
                         </div>
                     )}
                 </TabPanel>
-                <Fab onClick={(e) => this.handleOpen(e)} variant="extended" className="position-fixed"
-                     style={{right: 35, bottom: 35, backgroundColor: '#00A32E', color: '#fff'}}>
-                    <Add/>
-                    Adicionar Produto
-                </Fab>
+	            {this.renderProductButton()}
                 <Modal
                     aria-labelledby="spring-modal-title"
                     aria-describedby="spring-modal-description"
@@ -421,83 +355,6 @@ class Catalogs extends Component {
                                         </Button>
                                     </div>
                                 </div>
-
-                                {/*<div className="">*/}
-                                {/*    <div className="d-table mx-5">*/}
-                                {/*        <TextField*/}
-                                {/*            label="Quantidade"*/}
-                                {/*            id="quantity"*/}
-                                {/*            name="quantity"*/}
-                                {/*            type="number"*/}
-                                {/*            className="w-100 my-3"*/}
-                                {/*            InputProps={{*/}
-                                {/*                startAdornment: <InputAdornment position="start">+1</InputAdornment>,*/}
-                                {/*            }}*/}
-                                {/*            variant="outlined"*/}
-                                {/*        />*/}
-                                {/*        <br/>*/}
-                                {/*        <TextField*/}
-                                {/*            label="Preço"*/}
-                                {/*            id="price"*/}
-                                {/*            name="price"*/}
-                                {/*            type="number"*/}
-                                {/*            className="w-100 my-3"*/}
-                                {/*            InputProps={{*/}
-                                {/*                startAdornment: <InputAdornment position="start">€</InputAdornment>,*/}
-                                {/*            }}*/}
-                                {/*            variant="outlined"*/}
-                                {/*        />*/}
-                                {/*        <br/>*/}
-                                {/*        <FormControlLabel className=""*/}
-                                {/*                          onChange={(e) => this.handleChangeSwitchDate()}*/}
-                                {/*                          control={<Switch/>} label="Data"/>*/}
-                                {/*        <br/>*/}
-                                {/*        <TextField*/}
-                                {/*            id="stock_date"*/}
-                                {/*            label="Data"*/}
-                                {/*            name="stock_date"*/}
-                                {/*            type="date"*/}
-                                {/*            disabled={this.state.enable_data}*/}
-                                {/*            className="w-100 my-3"*/}
-                                {/*            InputProps={{*/}
-                                {/*                startAdornment: <InputAdornment*/}
-                                {/*                    position="start"><CalendarToday/></InputAdornment>*/}
-                                {/*            }}*/}
-                                {/*            InputLabelProps={{*/}
-                                {/*                shrink: true,*/}
-                                {/*            }}*/}
-                                {/*            variant="outlined"*/}
-                                {/*        />*/}
-                                {/*        <br/>*/}
-                                {/*        <FormControlLabel className=""*/}
-                                {/*                          onChange={(e) => this.handleChangeSwitchMinQuantity()}*/}
-                                {/*                          control={<Switch/>}*/}
-                                {/*                          label="Adicionar quantidade mínima por compra"/>*/}
-                                {/*        <br/>*/}
-                                {/*        <TextField*/}
-                                {/*            label="Quantidade miníma"*/}
-                                {/*            id="min_quantity"*/}
-                                {/*            name="min_quantity"*/}
-                                {/*            type="number"*/}
-                                {/*            className="w-100 my-3"*/}
-                                {/*            disabled={this.state.enable_min_quantity}*/}
-                                {/*            InputProps={{*/}
-                                {/*                startAdornment: <InputAdornment position="start">+1</InputAdornment>,*/}
-                                {/*            }}*/}
-                                {/*            variant="outlined"*/}
-                                {/*        />*/}
-                                {/*        <Button*/}
-                                {/*            variant="contained"*/}
-                                {/*            color="primary"*/}
-                                {/*            className="w-100 my-3"*/}
-                                {/*            style={{height: 56}}*/}
-                                {/*            endIcon={<Add/>}*/}
-                                {/*            type="submit"*/}
-                                {/*        >*/}
-                                {/*            Criar Produto*/}
-                                {/*        </Button>*/}
-                                {/*    </div>*/}
-                                {/*</div>*/}
                             </div>
                         </form>
                     </Fade>
@@ -757,6 +614,101 @@ class Catalogs extends Component {
         );
     }
 
+    renderStockInStore = () => {
+    	console.log("stock in store -> ", this.props.catalogsInStore)
+	    return this.props.catalogsInStore.map((e) =>
+		    <div key={e.id} className="p-3 w-50">
+			    <Card>
+				    <CardHeader
+					    avatar={
+						    <Avatar style={{height: 75, width: 75}} aria-label="recipe"
+						            className="avatar">
+							    <img src={Config.url + e.product.image} style={{height: "100%"}}/>
+						    </Avatar>
+					    }
+					    title={<strong>Produto: {e.product.name}</strong>}
+					    subheader={(<div>
+						    <strong>Data: </strong> {e.date_string}<br/><strong>Valor: </strong> {e.price_string}<br/><strong>Quantidade: </strong> {e.quantity_string}
+					    </div>)}
+				    />
+			    </Card>
+		    </div>
+	    )
+    }
+
+    renderProductFilter = () => {
+    	console.log("render filter -> ", getItem("user_id"))
+    	if (getItem("user_id") !== "5") {
+    		return (
+
+			    <Accordion expanded={this.state.expanded} onChange={() => this.acordionHandleChange()}>
+				    <AccordionSummary
+					    expandIcon={<ExpandMoreIcon/>}
+					    aria-controls="panel1bh-content"
+					    id="panel1bh-header"
+				    >
+					    <Typography className="">Filtros</Typography>
+				    </AccordionSummary>
+
+				    <AccordionDetails className="d-block">
+					    <div className="d-flex">
+						    <FormControl variant="outlined" className="my-auto" style={{width: 350}}>
+							    <InputLabel id="demo-simple-select-outlined-label"
+							                className="w-100">Produto</InputLabel>
+							    <Select
+								    labelId="demo-simple-select-outlined-label"
+								    id="demo-simple-select-outlined"
+								    value={this.state.productFilter}
+								    onChange={(e) => this.handleChangeProductFilter(e)}
+								    label="Produto"
+							    >
+								    <MenuItem key={0} value={0}> </MenuItem>
+								    {
+									    this.props.products.map((e) =>
+										    <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>
+									    )
+								    }
+							    </Select>
+						    </FormControl>
+					    </div>
+					    {/*<br/>*/}
+					    {/*<div className="d-flex">*/}
+					    {/*    <FormControl variant="outlined" className="my-auto">*/}
+					    {/*        <InputLabel id="demo-simple-select-outlined-label"*/}
+					    {/*                    className="w-100">Ordernar por</InputLabel>*/}
+					    {/*        <Select*/}
+					    {/*            labelId="demo-simple-select-outlined-label"*/}
+					    {/*            id="demo-simple-select-outlined"*/}
+					    {/*            value={this.state.product}*/}
+					    {/*            onChange={(e) => this.handleChangeProduct(e)}*/}
+					    {/*            label="Produto"*/}
+					    {/*        >*/}
+					    {/*            {*/}
+					    {/*                this.props.products.map((e) =>*/}
+					    {/*                    <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>*/}
+					    {/*                )*/}
+					    {/*            }*/}
+					    {/*        </Select>*/}
+					    {/*    </FormControl>*/}
+					    {/*</div>*/}
+				    </AccordionDetails>
+			    </Accordion>
+		    )
+	    }
+    }
+
+    renderProductButton = () => {
+    	if (getItem("user_id") === "5") {
+		    return (
+			    <Fab onClick={(e) => this.handleOpen(e)} variant="extended" className="position-fixed"
+			         style={{right: 35, bottom: 35, backgroundColor: '#00A32E', color: '#fff'}}>
+				    <Add/>
+				    Adicionar Produto
+			    </Fab>
+		    )
+	    }
+    }
+
     handleChangeProduct(e) {
         for (const key in this.props.products) {
             if (this.props.products[key].id === e.target.value) {
@@ -771,12 +723,19 @@ class Catalogs extends Component {
 
     handleChangeProductFilter(e) {
         for (const key in this.props.products) {
+        	console.log("key -> ", key)
             if (this.props.products[key].id === e.target.value) {
+	            console.log("refreshing with selected product wit id -> ", e.target.value)
+	            const data = {product_id: e.target.value}
+	            this.props.getProductStockAvailable(data)
+	            this.props.getProductStockFuture(data)
                 this.setState({
                     productFilter: e.target.value,
                 })
             }
         }
+
+
 
     }
 
@@ -856,17 +815,14 @@ class Catalogs extends Component {
     addProductStock(e) {
         e.preventDefault();
         let postData = {
-            'user_id': 17,
+            'user_id': getItem("user_id"),
             'product_id': this.state.product,
             'quantity': e.target.quantity.value,
-            'price': e.target.price.value
+            'price': e.target.price.value,
         }
-        if (this.state.enable_data === false) {
-            postData['min_quantity'] = e.target.min_quantity.value;
-        }
-        if (this.state.enable_min_quantity === false) {
-            postData['stock_date'] = e.target.stock_date.value;
-        }
+	    postData['stock_date'] = e.target.stock_date.value;
+	    postData['min_quantity'] = e.target.min_quantity.value;
+
         console.log('post data', postData)
         this.props.addProductStock(postData, this.props);
 
@@ -881,8 +837,16 @@ class Catalogs extends Component {
             enable_data: true,
             enable_min_quantity: true
         })
-        this.props.getCatalogsInStore();
-        this.props.getCatalogsInProduction();
+
+	    if (this.state.productFilter === undefined) {
+		    this.props.getCatalogsInStore();
+		    this.props.getCatalogsInProduction();
+	    } else {
+		    const data = {product_id: this.state.productFilter}
+		    this.props.getProductStockAvailable(data)
+		    this.props.getProductStockFuture(data)
+	    }
+
     }
 }
 
@@ -896,7 +860,9 @@ const mapFunctionsToProps = {
     getCatalogsInStore,
     getCatalogsInProduction,
     getProducts,
-    addProductStock
+    addProductStock,
+	getProductStockAvailable,
+	getProductStockFuture
 };
 
 Catalogs.defaultProps = {
