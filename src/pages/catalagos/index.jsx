@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Connect from "react-redux/es/connect/connect";
-import {getCatalogsInStore, getCatalogsInProduction, getProducts, addProductStock, getProductStockAvailable, getProductStockFuture} from "./functions"
+import {getCatalogsInStore, getCatalogsInProduction, getProducts, addProductStock, getProductStockAvailable, getProductStockFuture, addReserve} from "./functions"
 import './index.css';
 import {MDBDataTable} from "mdbreact";
 import {Link, withRouter} from "react-router-dom";
@@ -98,11 +98,14 @@ class Catalogs extends Component {
             value: 0,
             modal: false,
             modalReserve: false,
+            productReserve: null,
+            productReserveFuture: null,
             modalReserveFuture: false,
             selectedImage: '',
             product: undefined,
             enable_data: true,
             enable_min_quantity: true,
+            finalPrice: 0,
             expanded: false,
             productFilter: undefined,
             selectedStock: {'name': 'maça', 'color': '#D68D00', 'colorLight': '#FEFFDD'},
@@ -141,6 +144,42 @@ class Catalogs extends Component {
     	console.log("user", getItem("user_id"))
 	    console.log("stock in store -> ", this.props.catalogsInStore)
     	console.log("stock in production -> ", this.props.catalogsInProduction)
+        const productReserve = this.state.productReserve;
+        const productReserveFuture = this.state.productReserveFuture;
+        let reserveImage = '';
+        let reserveProductName = '';
+        let reserveProductColor = '';
+        let reserveSellUnity = '';
+        let reserveQuantityAvailableString = '';
+        let reserveQuantityAvailable = '';
+        let reserveQuantityMinString = '';
+        let reserveQuantityMin = '';
+        let reservePriceString = '';
+        let reservePrice = '';
+        if (productReserve != null) {
+            reserveImage=productReserve.product.image;
+            reserveProductName=productReserve.product.name;
+            reserveProductColor=productReserve.product.color_light;
+            reserveSellUnity=productReserve.product.type_string;
+            reserveQuantityAvailableString=productReserve.quantity_left_string;
+            reserveQuantityAvailable=productReserve.quantity_left;
+            reserveQuantityMinString=productReserve.min_purchase_string;
+            reserveQuantityMin=productReserve.in_purchase;
+            reservePriceString=productReserve.price_string;
+            reservePrice=productReserve.price;
+        }
+        if (productReserveFuture != null) {
+            reserveImage=productReserveFuture.product.image;
+            reserveProductName=productReserveFuture.product.name;
+            reserveProductColor=productReserveFuture.product.color_light;
+            reserveSellUnity=productReserveFuture.product.type_string;
+            reserveQuantityAvailableString=productReserveFuture.quantity_left_string;
+            reserveQuantityAvailable=productReserveFuture.quantity_left;
+            reserveQuantityMinString=productReserveFuture.min_purchase_string;
+            reserveQuantityMin=productReserveFuture.in_purchase;
+            reservePriceString=productReserveFuture.price_string;
+            reservePrice=productReserveFuture.price;
+        }
 
         return (
             <div>
@@ -155,7 +194,7 @@ class Catalogs extends Component {
                         textColor="primary"
                         aria-label="scrollable force tabs example"
                     >
-                        <Tab label="Em loja" icon={<Store/>} {...a11yProps(0)} />
+                        <Tab label="À venda" icon={<Store/>} {...a11yProps(0)} />
                         <Tab label="Em produção" icon={<WbSunnyOutlined/>} {...a11yProps(1)} />
                     </Tabs>
 	                {this.renderProductFilter()}
@@ -168,12 +207,12 @@ class Catalogs extends Component {
                 </TabPanel>
                 <TabPanel value={this.state.value} index={1}>
                     {this.props.catalogsInProduction.map((e) =>
-                        <div key={e.id} className="p-3 w-50">
+                        <div key={e.id} className="p-3 w-50"  style={{cursor: 'pointer'}} onClick={() => this.handleOpenReserve(e)}>
                             <Card>
                                 <CardHeader
                                     avatar={
                                         <Avatar style={{height: 75, width: 75}} aria-label="recipe" className="avatar">
-                                            <img className="h-100 w-100" src={Config.url + e.product.image}/>
+                                            <img className="h-100" src={Config.url + e.product.image}/>
                                         </Avatar>
                                     }
                                     title={<strong>Produto: {e.product.name}</strong>}
@@ -216,7 +255,7 @@ class Catalogs extends Component {
                                     </div>
                                     <div className="w-50">
                                         <IconButton aria-label="delete" className="float-right"
-                                                    onClick={(e) => this.handleClose()}>
+                                                    onClick={(e) => this.handleCloseReserve()}>
                                             <Close fontSize="large"/>
                                         </IconButton>
                                     </div>
@@ -227,7 +266,7 @@ class Catalogs extends Component {
                                             <div style={{
                                                 width: 500,
                                                 height: 250,
-                                                backgroundImage: 'url(' + Config.url + this.state.selectedImage + ')',
+                                                backgroundImage: 'url(' + Config.url + reserveImage+ ')',
                                                 backgroundSize: "cover",
                                             }}/>
                                         </div>
@@ -241,9 +280,9 @@ class Catalogs extends Component {
                                                 border: 'solid 2px #000',
                                                 borderRadius: 8,
                                                 lineHeight: '44px',
-                                                backgroundColor: this.state.selectedStock.colorLight
+                                                backgroundColor: reserveProductColor
                                             }} className="mx-auto text-center">
-                                                {this.state.selectedStock.name}
+                                                {reserveProductName}
                                             </div>
                                         </div>
                                     </div>
@@ -258,8 +297,7 @@ class Catalogs extends Component {
                                                          style={{color: 'rgba(0, 0, 0, 0.54)', left: 25, top: 17}}>
                                                         <strong>Quantidade Disponível:</strong></div>
                                                     <div className="float-right position-absolute"
-                                                         style={{color: '#000', right: 25, top: 17}}><strong>10.000
-                                                        kilos</strong></div>
+                                                         style={{color: '#000', right: 25, top: 17}}><strong>{reserveQuantityAvailableString}</strong></div>
                                                 </Paper>
                                             </Grid>
                                             <Grid item xs={12}>
@@ -269,8 +307,7 @@ class Catalogs extends Component {
                                                          style={{color: 'rgba(0, 0, 0, 0.54)', left: 25, top: 17}}>
                                                         <strong>Quantidade mínima:</strong></div>
                                                     <div className="float-right position-absolute"
-                                                         style={{color: '#000', right: 25, top: 17}}><strong>10.000
-                                                        kilos</strong></div>
+                                                         style={{color: '#000', right: 25, top: 17}}><strong>{reserveQuantityMinString}</strong></div>
                                                 </Paper>
                                             </Grid>
                                             <Grid item xs={12}>
@@ -280,8 +317,7 @@ class Catalogs extends Component {
                                                          style={{color: 'rgba(0, 0, 0, 0.54)', left: 25, top: 17}}>
                                                         <strong>Preço:</strong></div>
                                                     <div className="float-right position-absolute"
-                                                         style={{color: '#000', right: 25, top: 17}}><strong>10
-                                                        €/kg</strong></div>
+                                                         style={{color: '#000', right: 25, top: 17}}><strong>{reservePriceString}</strong></div>
                                                 </Paper>
                                             </Grid>
                                             <Grid item xs={12}/>
@@ -291,10 +327,11 @@ class Catalogs extends Component {
                                                        style={{backgroundColor: '#FFF', height: 56}}>
                                                     <TextField
                                                         label="Quantidade"
-                                                        id="min_quantity"
-                                                        name="min_quantity"
+                                                        id="quantity"
+                                                        name="quantity"
                                                         type="number"
                                                         variant="outlined"
+                                                        onChange={(e) => this.changeQuantity(Number(e.target.value), Number(reservePrice))}
                                                     />
                                                 </Paper>
                                             </Grid>
@@ -305,8 +342,7 @@ class Catalogs extends Component {
                                                          style={{color: 'rgba(0, 0, 0, 0.54)', left: 25, top: 17}}>
                                                         <strong>Total:</strong></div>
                                                     <div className="float-right position-absolute"
-                                                         style={{color: '#000', right: 25, top: 17}}><strong>10.000
-                                                        kilos</strong></div>
+                                                         style={{color: '#000', right: 25, top: 17}}><strong>{this.state.finalPrice} €</strong></div>
                                                 </Paper>
                                             </Grid>
                                         </Grid>
@@ -463,10 +499,16 @@ class Catalogs extends Component {
         );
     }
 
+    changeQuantity(a, b){
+        console.log(a, b);
+        this.setState({
+            finalPrice: a * b
+        })
+    }
+
     renderStockInStore = () => {
-    	console.log("stock in store -> ", this.props.catalogsInStore)
 	    return this.props.catalogsInStore.map((e) =>
-		    <div key={e.id} className="p-3 w-50">
+		    <div key={e.id} className="p-3 w-50" style={{cursor: 'pointer'}} onClick={() => this.handleOpenReserve(e)}>
 			    <Card>
 				    <CardHeader
 					    avatar={
@@ -637,27 +679,34 @@ class Catalogs extends Component {
         })
     }
 
-    handleOpenReserve() {
+    handleOpenReserve(e) {
+        debug('reserve',e)
         this.setState({
-            modalReserve: true
+            modalReserve: true,
+            productReserve :e
         })
     }
 
     handleCloseReserve() {
         this.setState({
-            modalReserve: false
+            modalReserve: false,
+            productReserve: null
+
         })
     }
 
-    handleOpenReserveFuture() {
+    handleOpenReserveFuture(e) {
+        debug('reserve future',e)
         this.setState({
-            modalReserveFuture: true
+            modalReserveFuture: true,
+            productReserveFuture:e
         })
     }
 
     handleCloseReserveFuture() {
         this.setState({
-            modalReserveFuture: false
+            modalReserveFuture: false,
+            productReserveFuture: null
         })
     }
 
@@ -698,10 +747,13 @@ class Catalogs extends Component {
 		    this.props.getCatalogsInProduction();
 	    } else {
 		    const data = {product_id: this.state.productFilter}
-		    this.props.getProductStockAvailable(data)
-		    this.props.getProductStockFuture(data)
+		    this.props.getProductStockAvailable(data);
+		    this.props.getProductStockFuture(data);
 	    }
 
+    }
+    addReserve(e){
+        this.props.addReserve({'buyer_id': getItem('user_id'), 'quantity': e.target.quantity.value}, this.props)
     }
 }
 
@@ -717,7 +769,8 @@ const mapFunctionsToProps = {
     getProducts,
     addProductStock,
 	getProductStockAvailable,
-	getProductStockFuture
+	getProductStockFuture,
+    addReserve,
 };
 
 Catalogs.defaultProps = {

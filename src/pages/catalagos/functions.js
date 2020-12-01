@@ -136,3 +136,15 @@ export const getProductStockFuture = (postData, props) => dispatch => {
 
 		});
 };
+export const addReserve = (postData, id, props) => dispatch => {
+	fetch(Config.url + '/api/products/'+id, requestInit("POST", postData, true))
+		.then(handleRequestErrors)
+		.then(response => response.json())
+		.then(response => {
+			debug("products for sale -> ", response)
+			alertSuccess('Reserva adicionada com sucesso.')
+		})
+		.catch(function (error) {
+
+		});
+};

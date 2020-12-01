@@ -264,7 +264,7 @@ function Index(props) {
                             {/*</Route>*/}
 
                             <Route path="/">
-                                <Dashboard/>
+                                <Catalogs/>
                             </Route>
                         </Switch>
                     </main>

@@ -6,6 +6,7 @@ import {Button, Divider, Grid, TextField} from '@material-ui/core';
 import './index.css';
 import Card from '@material-ui/core/Card';
 import {debug, getItem, saveItem} from "../../actions/encrypt";
+import AgroAzores from "../../assets/AgroAzores.png";
 
 class AuthenticationComponent extends PureComponent {
 
@@ -48,7 +49,13 @@ class AuthenticationComponent extends PureComponent {
                         </filter>
                     </defs>
                 </svg>
-                <div className="p-5" style={{position: 'absolute', left: '50%', top: '60%', transform: 'translate(-50%, -60%)'}}>
+                <div className="p-5"
+                     style={{position: 'absolute', left: '50%', top: '60%', transform: 'translate(-50%, -60%)'}}>
+                    <div>
+                        <Grid container alignItems="center">
+                            <img className="mx-auto" src={AgroAzores}/>
+                        </Grid>
+                    </div>
                     <div>
                         <Grid container alignItems="center">
                             <div className="px-5">{this.renderAuthenticationComponent()}</div>
@@ -69,20 +76,22 @@ class AuthenticationComponent extends PureComponent {
             return (
                 <form onSubmit={(e) => this.oauthSubmit(e)} autoComplete="off">
                     <div>
-                        <TextField style={{minWidth: '300px'}} className="my-3" id="email" name='email' label="Email" variant="outlined" required/>
+                        <TextField style={{minWidth: '300px'}} className="my-3" id="email" name='email' label="Email"
+                                   variant="outlined" required/>
                         <br/>
-                        <TextField style={{minWidth: '300px'}} className="my-3" id="password" name='password' label="Palavra-chave" variant="outlined" type='password' required/>
+                        <TextField style={{minWidth: '300px'}} className="my-3" id="password" name='password'
+                                   label="Palavra-chave" variant="outlined" type='password' required/>
                         <br/>
                         <br/>
                         <div className="my-3">
                             <Button
-                            style={{minWidth: 300, height: '56px', backgroundColor: '#CACACA', color:'#fff'}}
-                            variant="contained"
-                            // startIcon={<Person/>}
-                            type='submit'
-                        >
-                            Entrar
-                        </Button>
+                                style={{minWidth: 300, height: '56px', backgroundColor: '#CACACA', color: '#fff'}}
+                                variant="contained"
+                                // startIcon={<Person/>}
+                                type='submit'
+                            >
+                                Entrar
+                            </Button>
                         </div>
                     </div>
                 </form>
@@ -94,11 +103,11 @@ class AuthenticationComponent extends PureComponent {
         e.preventDefault();
         let email = document.getElementById("email").value;
         let password = document.getElementById("password").value;
-        if(email === "seller"){
-            saveItem('user_id',5)
+        if (email === "seller") {
+            saveItem('user_id', 5)
         }
-        if(email === "buyer"){
-            saveItem('user_id',15)
+        if (email === "buyer") {
+            saveItem('user_id', 15)
         }
         let postData = {identifier: email, password: password};
         this.props.authenticate(postData, this.props);
