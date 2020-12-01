@@ -41,7 +41,7 @@ function handleRequestErrors(response) {
 }
 
 export const getCatalogsInStore = (postData, props) => dispatch => {
-    fetch(Config.url + '/api/users/100/stock/available', requestInit("GET", postData, true))
+    fetch(Config.url + '/api/users/17/stock/available', requestInit("GET", postData, true))
         .then(handleRequestErrors)
         .then(response => response.json())
         .then(response => {
@@ -88,6 +88,7 @@ export const addProductStock = (postData, props) => dispatch => {
         .then(handleRequestErrors)
         .then(response => response.json())
         .then(response => {
+            alertSuccess('Produto adicionado com sucesso!');
 
         })
         .catch(function (error) {

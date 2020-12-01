@@ -10,7 +10,20 @@ import EditIcon from "@material-ui/icons/Edit";
 import {debug} from "../../actions/encrypt";
 import DeleteIcon from "@material-ui/icons/DeleteForever";
 import AppBar from '@material-ui/core/AppBar';
-import {Tab, Tabs, Box, Card, CardHeader, Avatar, IconButton} from '@material-ui/core';
+import {
+    Tab,
+    Tabs,
+    Box,
+    Card,
+    CardHeader,
+    Avatar,
+    IconButton,
+    Fade,
+    Grid,
+    Paper,
+    TextField,
+    Modal
+} from '@material-ui/core';
 import PhoneIcon from '@material-ui/icons/Phone';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import PersonPinIcon from '@material-ui/icons/PersonPin';
@@ -18,7 +31,7 @@ import HelpIcon from '@material-ui/icons/Help';
 import ShoppingBasket from '@material-ui/icons/ShoppingBasket';
 import ThumbDown from '@material-ui/icons/ThumbDown';
 import ThumbUp from '@material-ui/icons/ThumbUp';
-import {QueryBuilder, AssignmentTurnedIn} from '@material-ui/icons';
+import {QueryBuilder, AssignmentTurnedIn, Close, Receipt, Delete, Save} from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
 import {makeStyles} from '@material-ui/core/styles';
 import Config from "../../config.json";
@@ -67,13 +80,13 @@ class Orders extends Component {
         super(props);
         this.state = {
             value: 0,
+            modalOrderView: true,
+            selectedOrder: {'name': 'maça', 'color': '#D68D00', 'colorLight': '#FEFFDD'}
         }
     }
 
     // react functions
     componentWillReceiveProps(nextProps, nextContext) {
-        console.log('comclued', nextProps.ordersConclued)
-        console.log('saf', nextProps.ordersPending)
 
     }
 
@@ -109,7 +122,7 @@ class Orders extends Component {
                 <TabPanel value={this.state.value} index={0}>
                     <div className="d-flex flex-wrap">
                         {this.props.ordersPending.map((e) =>
-                            <div key={e.id} className="p-3 w-50">
+                            <div key={e.id} className="p-3 w-50" style={{cursor: 'pointer'}} onClick={() => this.handleOpenModalOrderView()}>
                                 <Card>
                                     <CardHeader
                                         avatar={
@@ -142,8 +155,126 @@ class Orders extends Component {
                         </div>
                     )}
                 </TabPanel>
+                <Modal
+                    aria-labelledby="spring-modal-title"
+                    aria-describedby="spring-modal-description"
+                    className=""
+                    open={this.state.modalOrderView}
+                    onClose={(e) => this.handleCloseModalOrderView()}
+                    closeAfterTransition
+                    // BackdropComponent={Backdrop}
+                    // BackdropProps={{
+                    //     timeout: 500,
+                    // }}
+                >
+                    <Fade in={this.state.modalOrderView}>
+                        <form onSubmit={(e) => this.addProductStock(e)}>
+                            <div className="card position-absolute "
+                                 style={{right: "50%", top: "50%", transform: "translate(50%,-50%)"}}>
+                                <div className="header d-flex" style={{borderBottom: "0.1px #e0e0e0 solid"}}>
+                                    <div className="w-50">
+                                        <div style={{fontSize: 22, fontWeight: "400", padding: 12}}>
+                                            Efetuar Reserva
+                                        </div>
+                                    </div>
+                                    <div className="w-50">
+                                        <IconButton aria-label="delete" className="float-right"
+                                                    onClick={(e) => this.handleCloseModalOrderView()}>
+                                            <Close fontSize="large"/>
+                                        </IconButton>
+                                    </div>
+                                </div>
+                                <div className="body d-flex">
+                                    <div className="mx-auto m-3">
+                                        <div className="avatar p-2">
+                                            <div style={{
+                                                width: 500,
+                                                height: 250,
+                                                backgroundImage: 'url(' + Config.url + this.state.selectedImage + ')',
+                                                backgroundSize: "cover",
+                                            }}/>
+                                        </div>
+                                        <div style={{height: 56, width: 400, marginTop: '-45px'}}
+                                             className="p-2 d-flex mx-auto">
+                                            <div style={{
+                                                height: 56,
+                                                width: 350,
+                                                fontWeight: 600,
+                                                fontSize: 22,
+                                                border: 'solid 2px #000',
+                                                borderRadius: 8,
+                                                lineHeight: '44px',
+                                                backgroundColor: this.state.selectedOrder.colorLight
+                                            }} className="mx-auto text-center">
+                                                {this.state.selectedOrder.name}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="">
+                                    <div className="d-table mx-5" style={{width: 450}}>
+                                        <Grid container spacing={3}>
+                                            <Grid item xs={12}>
+                                                <Paper className="position-relative" style={{backgroundColor: '#F0F0F0', height: 56}}>
+                                                    <div className="float-left position-absolute" style={{color:  'rgba(0, 0, 0, 0.54)', left:25,top:17 }}><strong>520 kg</strong></div>
+                                                </Paper>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <Paper className="position-relative" style={{backgroundColor: '#F0F0F0', height: 56}}>
+                                                    <div className="float-left position-absolute" style={{color:  'rgba(0, 0, 0, 0.54)', left:25,top:17 }}><strong>1544548468484€</strong></div>
+                                                </Paper>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <Paper className="position-relative" style={{backgroundColor: '#F0F0F0', height: 56}}>
+                                                    <div className="float-left position-absolute" style={{color:  'rgba(0, 0, 0, 0.54)', left:25,top:17 }}><strong>12-12-2021</strong></div>
+                                                </Paper>
+                                            </Grid>
+                                            <Grid item xs={12}/>
+                                            <Grid item xs={12}/>
+                                            <Grid item xs={12}/>
+                                        </Grid>
+                                        <div className="d-flex">
+                                            <Button
+                                                variant="contained"
+                                                className="w-50 mr-3"
+                                                style={{height: 56, backgroundColor: '#d11a2a', color: '#fff'}}
+                                                endIcon={<Delete/>}
+                                                type="submit"
+                                            >
+                                                Cancelar
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                className="w-50 ml-3"
+                                                style={{height: 56}}
+                                                endIcon={<Save/>}
+                                                type="submit"
+                                            >
+                                                Aprovar
+                                            </Button>
+                                        </div>
+                                        <br/>
+                                        <br/>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </Fade>
+                </Modal>
             </div>
         );
+    }
+    handleCloseModalOrderView(){
+        this.setState({
+            modalOrderView: false
+        })
+    }
+    handleOpenModalOrderView(){
+        this.setState({
+            modalOrderView: true
+        })
     }
 }
 
